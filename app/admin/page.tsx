@@ -21,6 +21,9 @@ import {
   Trash2,
   Plus,
   Smartphone,
+  TrendingUp,
+  MousePointer,
+  Clock,
 } from "lucide-react"
 
 interface User {
@@ -121,6 +124,51 @@ export default function AdminPage() {
     endDate: "",
   })
 
+  const [bannerAnalytics, setBannerAnalytics] = useState<Record<string, any>>({
+    "1": {
+      totalClicks: 245,
+      uniqueClicks: 198,
+      totalImpressions: 12500,
+      clickRate: 1.96,
+      avgViewDuration: 3.2,
+      clicksByCountry: {
+        Brasil: 180,
+        Portugal: 45,
+        "Estados Unidos": 20,
+      },
+      recentClicks: [
+        { timestamp: new Date().toISOString(), location: { city: "São Paulo", country: "Brasil" } },
+        {
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          location: { city: "Rio de Janeiro", country: "Brasil" },
+        },
+        { timestamp: new Date(Date.now() - 7200000).toISOString(), location: { city: "Lisboa", country: "Portugal" } },
+      ],
+    },
+    "2": {
+      totalClicks: 156,
+      uniqueClicks: 134,
+      totalImpressions: 8900,
+      clickRate: 1.75,
+      avgViewDuration: 2.8,
+      clicksByCountry: {
+        Brasil: 120,
+        Portugal: 25,
+        "Estados Unidos": 11,
+      },
+      recentClicks: [
+        { timestamp: new Date().toISOString(), location: { city: "Brasília", country: "Brasil" } },
+        { timestamp: new Date(Date.now() - 1800000).toISOString(), location: { city: "Porto", country: "Portugal" } },
+      ],
+    },
+  })
+
+  const [selectedBannerForAnalytics, setSelectedBannerForAnalytics] = useState("1")
+  const [analyticsDateRange, setAnalyticsDateRange] = useState({
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    endDate: new Date().toISOString().split("T")[0],
+  })
+
   const stats = {
     totalUsers: users.length,
     pendingUsers: users.filter((u) => u.status === "pending").length,
@@ -155,6 +203,16 @@ export default function AdminPage() {
       startDate: "",
       endDate: "",
     })
+  }
+
+  const fetchBannerAnalytics = async (bannerId: string) => {
+    // Simular chamada de API
+    console.log(`Fetching analytics for banner ${bannerId}`)
+  }
+
+  const fetchAllAnalytics = async () => {
+    // Simular chamada de API para todos os banners
+    console.log("Fetching all analytics")
   }
 
   return (
@@ -238,7 +296,7 @@ export default function AdminPage() {
 
         {/* Main Content */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white shadow-lg">
+          <TabsList className="grid w-full grid-cols-5 bg-white shadow-lg">
             <TabsTrigger value="users" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
               <Users className="h-4 w-4 mr-2" />
               Usuários
@@ -247,11 +305,15 @@ export default function AdminPage() {
               <BarChart3 className="h-4 w-4 mr-2" />
               Banners
             </TabsTrigger>
-            <TabsTrigger value="payments" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
               <DollarSign className="h-4 w-4 mr-2" />
               Pagamentos
             </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+            <TabsTrigger value="settings" className="data-[state=active]:bg-red-500 data-[state=active]:text-white">
               <Settings className="h-4 w-4 mr-2" />
               Configurações
             </TabsTrigger>
@@ -475,6 +537,297 @@ export default function AdminPage() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <div className="space-y-6">
+              {/* Analytics Overview */}
+              <Card className="shadow-xl border-0">
+                <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center">
+                    <TrendingUp className="h-5 w-5 mr-2" />
+                    Analytics de Banners
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <MousePointer className="h-8 w-8 mx-auto mb-2 text-blue-200" />
+                          <p className="text-blue-100 text-sm">Total de Cliques</p>
+                          <p className="text-2xl font-bold">
+                            {Object.values(bannerAnalytics).reduce(
+                              (sum: number, analytics: any) => sum + analytics.totalClicks,
+                              0,
+                            )}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <Eye className="h-8 w-8 mx-auto mb-2 text-green-200" />
+                          <p className="text-green-100 text-sm">Total de Impressões</p>
+                          <p className="text-2xl font-bold">
+                            {Object.values(bannerAnalytics)
+                              .reduce((sum: number, analytics: any) => sum + analytics.totalImpressions, 0)
+                              .toLocaleString()}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-orange-500 to-red-500 text-white">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <BarChart3 className="h-8 w-8 mx-auto mb-2 text-orange-200" />
+                          <p className="text-orange-100 text-sm">Taxa de Clique Média</p>
+                          <p className="text-2xl font-bold">
+                            {Object.values(bannerAnalytics).length > 0
+                              ? (
+                                  Object.values(bannerAnalytics).reduce(
+                                    (sum: number, analytics: any) => sum + analytics.clickRate,
+                                    0,
+                                  ) / Object.values(bannerAnalytics).length
+                                ).toFixed(2)
+                              : 0}
+                            %
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <Clock className="h-8 w-8 mx-auto mb-2 text-purple-200" />
+                          <p className="text-purple-100 text-sm">Tempo Médio de Visualização</p>
+                          <p className="text-2xl font-bold">
+                            {Object.values(bannerAnalytics).length > 0
+                              ? Math.round(
+                                  Object.values(bannerAnalytics).reduce(
+                                    (sum: number, analytics: any) => sum + analytics.avgViewDuration,
+                                    0,
+                                  ) / Object.values(bannerAnalytics).length,
+                                )
+                              : 0}
+                            s
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Banner Selection and Date Range */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="space-y-2">
+                      <Label>Selecionar Banner</Label>
+                      <Select value={selectedBannerForAnalytics} onValueChange={setSelectedBannerForAnalytics}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todos os banners" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os banners</SelectItem>
+                          {banners.map((banner) => (
+                            <SelectItem key={banner.id} value={banner.id}>
+                              {banner.company} - {banner.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Data de Início</Label>
+                      <Input
+                        type="date"
+                        value={analyticsDateRange.startDate}
+                        onChange={(e) => setAnalyticsDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Data de Fim</Label>
+                      <Input
+                        type="date"
+                        value={analyticsDateRange.endDate}
+                        onChange={(e) => setAnalyticsDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() =>
+                      selectedBannerForAnalytics !== "all"
+                        ? fetchBannerAnalytics(selectedBannerForAnalytics)
+                        : fetchAllAnalytics()
+                    }
+                    className="mb-6 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  >
+                    Atualizar Analytics
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Detailed Analytics for Selected Banner */}
+              {selectedBannerForAnalytics !== "all" && bannerAnalytics[selectedBannerForAnalytics] && (
+                <Card className="shadow-xl border-0">
+                  <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-lg">
+                    <CardTitle>
+                      Analytics Detalhado - {banners.find((b) => b.id === selectedBannerForAnalytics)?.company}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Performance Metrics */}
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-lg">Métricas de Performance</h4>
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span className="text-blue-700">Total de Cliques:</span>
+                            <span className="font-bold text-blue-900">
+                              {bannerAnalytics[selectedBannerForAnalytics].totalClicks}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span className="text-green-700">Cliques Únicos:</span>
+                            <span className="font-bold text-green-900">
+                              {bannerAnalytics[selectedBannerForAnalytics].uniqueClicks}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <span className="text-purple-700">Total de Impressões:</span>
+                            <span className="font-bold text-purple-900">
+                              {bannerAnalytics[selectedBannerForAnalytics].totalImpressions.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                            <span className="text-orange-700">Taxa de Clique (CTR):</span>
+                            <span className="font-bold text-orange-900">
+                              {bannerAnalytics[selectedBannerForAnalytics].clickRate.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Geographic Distribution */}
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-lg">Distribuição Geográfica</h4>
+                        <div className="space-y-2">
+                          {Object.entries(bannerAnalytics[selectedBannerForAnalytics].clicksByCountry).map(
+                            ([country, clicks]) => (
+                              <div key={country} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                <span>{country}</span>
+                                <Badge variant="secondary">{clicks} cliques</Badge>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recent Clicks */}
+                    <div className="mt-6">
+                      <h4 className="font-semibold text-lg mb-4">Cliques Recentes</h4>
+                      <div className="space-y-2">
+                        {bannerAnalytics[selectedBannerForAnalytics].recentClicks
+                          .slice(0, 5)
+                          .map((click: any, index: number) => (
+                            <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                              <div>
+                                <p className="text-sm font-medium">
+                                  {new Date(click.timestamp).toLocaleString("pt-BR")}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  {click.location?.city}, {click.location?.country}
+                                </p>
+                              </div>
+                              <Badge variant="outline">Click #{index + 1}</Badge>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* All Banners Performance Table */}
+              <Card className="shadow-xl border-0">
+                <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Performance de Todos os Banners
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-3">Banner</th>
+                          <th className="text-left p-3">Posição</th>
+                          <th className="text-left p-3">Cliques</th>
+                          <th className="text-left p-3">Impressões</th>
+                          <th className="text-left p-3">CTR</th>
+                          <th className="text-left p-3">Status</th>
+                          <th className="text-left p-3">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {banners.map((banner) => {
+                          const analytics = bannerAnalytics[banner.id]
+                          return (
+                            <tr key={banner.id} className="border-b hover:bg-gray-50">
+                              <td className="p-3">
+                                <div>
+                                  <p className="font-medium">{banner.company}</p>
+                                  <p className="text-sm text-gray-600">{banner.title}</p>
+                                </div>
+                              </td>
+                              <td className="p-3">
+                                <Badge variant="outline">{banner.position}</Badge>
+                              </td>
+                              <td className="p-3 font-medium">{analytics?.totalClicks || 0}</td>
+                              <td className="p-3 font-medium">{analytics?.totalImpressions?.toLocaleString() || 0}</td>
+                              <td className="p-3">
+                                <span
+                                  className={`font-medium ${
+                                    (analytics?.clickRate || 0) > 2
+                                      ? "text-green-600"
+                                      : (analytics?.clickRate || 0) > 1
+                                        ? "text-yellow-600"
+                                        : "text-red-600"
+                                  }`}
+                                >
+                                  {analytics?.clickRate?.toFixed(2) || 0}%
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <Badge variant={banner.status === "active" ? "default" : "secondary"}>
+                                  {banner.status}
+                                </Badge>
+                              </td>
+                              <td className="p-3">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedBannerForAnalytics(banner.id)}
+                                >
+                                  Ver Detalhes
+                                </Button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>
